@@ -1,19 +1,23 @@
-# Real-Time Phishing Simulator Arena - Codebase Rules
+# Global Tax Engine - Codebase Rules
 
-Welcome to the Real-Time Phishing Simulator Arena! This project is a multiplayer educational game where players interact with AI-generated phishing attacks and defend system nodes.
+Welcome to the Global Tax Engine! This project is a comprehensive tax calculation and tracking system supporting multiple countries.
 
 These are the strict rules for the codebase. **Every developer must follow these rules without exception.**
 
 ## 1. Allowed Technology Stack
 The following technologies are strictly mandated for use. No other major frameworks, databases, or languages may be used without explicit consultation and approval.
-*   **Frontend**: React / Next.js
-*   **3D Rendering**: React Three Fiber
-*   **Styling**: Tailwind CSS
-*   **Animations**: Framer Motion
-*   **Real-Time Data**: Socket.io
-*   **Backend API**: Fast API (Python)
-*   **Databases**: PostgreSQL (Relational Data) and Redis (Live Match Data & Caching)
-*   **AI Models**: GPT-4o-mini, Grok, Llama (for Attack Generation)
+
+| Layer          | Technology         | Why             |
+| -------------- | ------------------ | --------------- |
+| Frontend       | SvelteKit          | Fast + reactive |
+| Styling        | TailwindCSS        | Quick UI        |
+| Icons          | Lucide Icons       | clean icons     |
+| Charts         | Chart.js           | analytics       |
+| Backend        | Node.js + Express  | simple          |
+| Database       | Supabase free tier | auth + storage  |
+| Hosting        | Vercel             | free            |
+| PDF generation | pdf-lib            | invoices        |
+| Data           | local JSON dataset | no paid APIs    |
 
 ## 2. Clear Documentation Requirements
 *   **Every single file** must contain clear, beginner-friendly documentation at the top.
@@ -26,14 +30,28 @@ The following technologies are strictly mandated for use. No other major framewo
 ## 3. Strict Modification Policy 
 *   **NO new ideas, libraries, architectural changes, or processes are allowed without consultation.**
 *   If you find a missing piece or a better way to do something, *ask first*.
-*   Stick to the approved architecture diagrams:
-    *   *Frontend flow*: App -> Login -> Lobby -> Game -> Interact -> Debrief.
-    *   *Backend flow*: FastAPI handles Game Logic (PostgreSQL/Redis) and orchestrates AI Attack Generators (GPT/Voice/Llama/External APIs) securely.
+*   Stick to the approved architecture diagram:
+
+```text
+        User
+          |
+          |
+  SvelteKit Frontend
+          |
+-----------------------
+|                     |
+Tax Engine API        Supabase
+  (Node.js)           Database
+|
+|
+JSON Dataset
+(20 country rules)
+```
 
 ## 4. File and Folder Structure
 *   All folders and files must be easy to access and intuitively located.
-*   Use standard Next.js `src/app` routing for the frontend.
-*   Use a clear modular FastAPI structure (`app/api`, `app/core`, `app/services`, `app/models`) for the backend.
+*   Use standard SvelteKit `src/routes` and `src/lib` structure for the frontend.
+*   Use a clear modular Node.js/Express structure (`src/routes`, `src/controllers`, `src/services`, `src/utils`) for the backend.
 *   Do not dump files into the root directory. Keep the root clean.
 
-By adhering to these rules, we ensure a scalable, maintainable, and robust Real-Time Phishing Simulator Arena.
+By adhering to these rules, we ensure a scalable, maintainable, and robust Global Tax Engine.
