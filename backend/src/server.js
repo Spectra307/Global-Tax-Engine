@@ -63,6 +63,12 @@ app.use((err, req, res, next) => {
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`✅ Global Tax Engine API running at http://localhost:${PORT}`);
-});
+// Export app for testing
+module.exports = app;
+
+// Start the server if this file is run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`✅ Global Tax Engine API running at http://localhost:${PORT}`);
+  });
+}
