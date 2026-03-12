@@ -43,6 +43,24 @@ router.post('/', async (req, res) => {
       taxRatePercent
     } = req.body;
 
+    // ─── Input Validation & Type Conversion ────────────────────────────────────
+    // Ensure all numeric values are properly converted to numbers for calculations
+    const numOriginalAmount = parseFloat(originalAmount) || 0;
+    const numTaxRate = parseFloat(taxRate) || 0;
+    const numTaxAmount = parseFloat(taxAmount) || 0;
+    const numTotal = parseFloat(total) || 0;
+    
+    // Ensure string values
+    const strCurrency = String(currency || 'USD');
+    const strCountryName = String(countryName || 'Unknown');
+    const strCountryCode = String(countryCode || 'XX');
+    const strAuthority = String(authority || 'Tax Authority');
+    const strTaxName = String(taxName || 'Tax');
+    const strBuyerType = String(buyerType || 'B2C');
+    const strProductType = String(productType || 'digital');
+    const strTaxRatePercent = taxRatePercent ? String(taxRatePercent) : null;
+    const boolReverseCharge = Boolean(reverseCharge);
+
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
 
@@ -123,11 +141,11 @@ router.post('/', async (req, res) => {
 
     y -= 30;
     const detailRows = [
-      ['Destination Country', `${countryName} (${countryCode})`],
-      ['Product Type', productType === 'digital' ? 'Digital Product' : 'Physical Product'],
-      ['Buyer Type', buyerType === 'B2B' ? 'Business (B2B)' : 'Consumer (B2C)'],
-      ['Tax Authority', authority],
-      ['Tax Type', taxName]
+      ['Destination Country', `${strCountryName} (${strCountryCode})`],
+      ['Product Type', strProductType === 'digital' ? 'Digital Product' : 'Physical Product'],
+      ['Buyer Type', strBuyerType === 'B2B' ? 'Business (B2B)' : 'Consumer (B2C)'],
+      ['Tax Authority', strAuthority],
+      ['Tax Type', strTaxName]
     ];
 
     detailRows.forEach(([label, value]) => {
@@ -168,30 +186,30 @@ router.post('/', async (req, res) => {
 
     page.drawText('Description', { x: 50, y: y, size: 11, font: boldFont, color: dark });
     page.drawText('Rate', { x: 340, y: y, size: 11, font: boldFont, color: dark });
-    page.drawText(`Amount (${currency})`, { x: 430, y: y, size: 11, font: boldFont, color: dark });
+    page.drawText(`Amount (${strCurrency})`, { x: 430, y: y, size: 11, font: boldFont, color: dark });
     y -= 30;
 
     // Line: Base amount
     page.drawText('Sale Amount (before tax)', { x: 50, y, size: 11, font: regularFont, color: dark });
     page.drawText('—', { x: 340, y, size: 11, font: regularFont, color: dark });
-    page.drawText(Number(originalAmount).toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
+    page.drawText(numOriginalAmount.toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
     y -= 25;
 
     // Line: Tax
-    const taxLabel = reverseCharge ? `${taxName} (Reverse Charge)` : taxName;
+    const taxLabel = boolReverseCharge ? `${strTaxName} (Reverse Charge)` : strTaxName;
     page.drawText(taxLabel, { x: 50, y, size: 11, font: regularFont, color: dark });
-    page.drawText(taxRatePercent || `${(taxRate * 100).toFixed(1)}%`, { x: 340, y, size: 11, font: regularFont, color: dark });
-    page.drawText(Number(taxAmount).toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
+    page.drawText(strTaxRatePercent || `${(numTaxRate * 100).toFixed(1)}%`, { x: 340, y, size: 11, font: regularFont, color: dark });
+    page.drawText(numTaxAmount.toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
     y -= 10;
 
     // Total row
     page.drawRectangle({ x: 40, y: y - 8, width: width - 80, height: 30, color: purple });
     page.drawText('TOTAL', { x: 50, y: y + 3, size: 12, font: boldFont, color: white });
-    page.drawText(`${currency} ${Number(total).toFixed(2)}`, { x: 390, y: y + 3, size: 13, font: boldFont, color: white });
+    page.drawText(`${strCurrency} ${numTotal.toFixed(2)}`, { x: 390, y: y + 3, size: 13, font: boldFont, color: white });
     y -= 40;
 
     // ─── Reverse Charge Notice ────────────────────────────────────────────────
-    if (reverseCharge) {
+    if (boolReverseCharge) {
       y -= 10;
       page.drawRectangle({ x: 40, y: y - 10, width: width - 80, height: 40, color: rgb(0.9, 1.0, 0.96) });
       page.drawText(
