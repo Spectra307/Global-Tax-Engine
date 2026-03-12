@@ -1,0 +1,140 @@
+/* app.css - Global Styles for Global Tax Engine
+ *
+ * Imports Tailwind layers and defines custom design tokens,
+ * animations, and utility classes used across all pages.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg text-gray-900 font-sans antialiased;
+  }
+  h1 { @apply text-4xl font-bold; }
+  h2 { @apply text-2xl font-semibold; }
+  h3 { @apply text-lg font-semibold; }
+}
+
+/* ── Components ──────────────────────────────────────────── */
+@layer components {
+
+  /* Primary gradient button */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-200;
+    background: linear-gradient(135deg, #6C63FF, #00D9A5);
+    box-shadow: 0 4px 16px rgba(108, 99, 255, 0.35);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(108, 99, 255, 0.45);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold border border-gray-200 bg-white text-gray-700 transition-all duration-200;
+  }
+  .btn-ghost:hover {
+    @apply border-primary text-primary bg-purple-50;
+  }
+
+  /* Accent button (orange) */
+  .btn-accent {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200;
+    background: #FF7A18;
+    box-shadow: 0 4px 12px rgba(255, 122, 24, 0.3);
+  }
+  .btn-accent:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255, 122, 24, 0.4);
+  }
+
+  /* Mint button */
+  .btn-mint {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200;
+    background: #00D9A5;
+    box-shadow: 0 4px 12px rgba(0, 217, 165, 0.3);
+  }
+  .btn-mint:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 217, 165, 0.4);
+  }
+
+  /* White card */
+  .card {
+    @apply bg-white rounded-2xl p-6 shadow-card transition-all duration-200;
+  }
+  .card:hover {
+    @apply shadow-card-hover;
+  }
+
+  /* Form field */
+  .form-input {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-base
+           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-150;
+  }
+  .form-label {
+    @apply block text-sm font-medium text-gray-600 mb-1.5;
+  }
+
+  /* Icon box */
+  .icon-box-purple {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center;
+    background: linear-gradient(135deg, #6C63FF, #8B85FF);
+  }
+  .icon-box-mint {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center;
+    background: linear-gradient(135deg, #00D9A5, #00b88d);
+  }
+  .icon-box-orange {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center;
+    background: linear-gradient(135deg, #FF7A18, #ff9a4d);
+  }
+
+  /* Badge pill */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium;
+  }
+  .badge-purple {
+    @apply badge bg-primary/10 text-primary border border-primary/20;
+  }
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.animate-fade-up   { animation: fadeUp 0.5s ease forwards; }
+.animate-fade-in   { animation: fadeIn 0.4s ease forwards; }
+.animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6C63FF, #00D9A5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

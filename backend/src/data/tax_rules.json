@@ -1,0 +1,222 @@
+[
+  {
+    "country": "US",
+    "name": "United States",
+    "tax_name": "Sales Tax",
+    "digital_tax_rate": 0.0,
+    "physical_tax_rate": 0.07,
+    "reverse_charge": false,
+    "authority": "IRS (Internal Revenue Service)",
+    "currency": "USD",
+    "flag": "🇺🇸"
+  },
+  {
+    "country": "GB",
+    "name": "United Kingdom",
+    "tax_name": "VAT",
+    "digital_tax_rate": 0.20,
+    "physical_tax_rate": 0.20,
+    "reverse_charge": true,
+    "authority": "HMRC (His Majesty's Revenue & Customs)",
+    "currency": "GBP",
+    "flag": "🇬🇧"
+  },
+  {
+    "country": "DE",
+    "name": "Germany",
+    "tax_name": "VAT (MwSt)",
+    "digital_tax_rate": 0.19,
+    "physical_tax_rate": 0.19,
+    "reverse_charge": true,
+    "authority": "German Federal Central Tax Office (BZSt)",
+    "currency": "EUR",
+    "flag": "🇩🇪"
+  },
+  {
+    "country": "FR",
+    "name": "France",
+    "tax_name": "VAT (TVA)",
+    "digital_tax_rate": 0.20,
+    "physical_tax_rate": 0.20,
+    "reverse_charge": true,
+    "authority": "Direction Générale des Finances Publiques",
+    "currency": "EUR",
+    "flag": "🇫🇷"
+  },
+  {
+    "country": "IT",
+    "name": "Italy",
+    "tax_name": "VAT (IVA)",
+    "digital_tax_rate": 0.22,
+    "physical_tax_rate": 0.22,
+    "reverse_charge": true,
+    "authority": "Agenzia delle Entrate",
+    "currency": "EUR",
+    "flag": "🇮🇹"
+  },
+  {
+    "country": "ES",
+    "name": "Spain",
+    "tax_name": "VAT (IVA)",
+    "digital_tax_rate": 0.21,
+    "physical_tax_rate": 0.21,
+    "reverse_charge": true,
+    "authority": "Agencia Tributaria",
+    "currency": "EUR",
+    "flag": "🇪🇸"
+  },
+  {
+    "country": "CA",
+    "name": "Canada",
+    "tax_name": "GST/HST",
+    "digital_tax_rate": 0.05,
+    "physical_tax_rate": 0.13,
+    "reverse_charge": false,
+    "authority": "Canada Revenue Agency (CRA)",
+    "currency": "CAD",
+    "flag": "🇨🇦"
+  },
+  {
+    "country": "AU",
+    "name": "Australia",
+    "tax_name": "GST",
+    "digital_tax_rate": 0.10,
+    "physical_tax_rate": 0.10,
+    "reverse_charge": false,
+    "authority": "Australian Taxation Office (ATO)",
+    "currency": "AUD",
+    "flag": "🇦🇺"
+  },
+  {
+    "country": "JP",
+    "name": "Japan",
+    "tax_name": "Consumption Tax",
+    "digital_tax_rate": 0.10,
+    "physical_tax_rate": 0.10,
+    "reverse_charge": false,
+    "authority": "National Tax Agency (NTA)",
+    "currency": "JPY",
+    "flag": "🇯🇵"
+  },
+  {
+    "country": "IN",
+    "name": "India",
+    "tax_name": "GST",
+    "digital_tax_rate": 0.18,
+    "physical_tax_rate": 0.18,
+    "reverse_charge": true,
+    "authority": "Central Board of Indirect Taxes (CBIC)",
+    "currency": "INR",
+    "flag": "🇮🇳"
+  },
+  {
+    "country": "BR",
+    "name": "Brazil",
+    "tax_name": "ICMS / ISS",
+    "digital_tax_rate": 0.17,
+    "physical_tax_rate": 0.17,
+    "reverse_charge": false,
+    "authority": "Receita Federal do Brasil",
+    "currency": "BRL",
+    "flag": "🇧🇷"
+  },
+  {
+    "country": "SG",
+    "name": "Singapore",
+    "tax_name": "GST",
+    "digital_tax_rate": 0.09,
+    "physical_tax_rate": 0.09,
+    "reverse_charge": false,
+    "authority": "Inland Revenue Authority of Singapore (IRAS)",
+    "currency": "SGD",
+    "flag": "🇸🇬"
+  },
+  {
+    "country": "NL",
+    "name": "Netherlands",
+    "tax_name": "VAT (BTW)",
+    "digital_tax_rate": 0.21,
+    "physical_tax_rate": 0.21,
+    "reverse_charge": true,
+    "authority": "Dutch Tax and Customs Administration (Belastingdienst)",
+    "currency": "EUR",
+    "flag": "🇳🇱"
+  },
+  {
+    "country": "SE",
+    "name": "Sweden",
+    "tax_name": "VAT (MOMS)",
+    "digital_tax_rate": 0.25,
+    "physical_tax_rate": 0.25,
+    "reverse_charge": true,
+    "authority": "Swedish Tax Agency (Skatteverket)",
+    "currency": "SEK",
+    "flag": "🇸🇪"
+  },
+  {
+    "country": "NO",
+    "name": "Norway",
+    "tax_name": "VAT (MVA)",
+    "digital_tax_rate": 0.25,
+    "physical_tax_rate": 0.25,
+    "reverse_charge": true,
+    "authority": "Norwegian Tax Administration (Skatteetaten)",
+    "currency": "NOK",
+    "flag": "🇳🇴"
+  },
+  {
+    "country": "DK",
+    "name": "Denmark",
+    "tax_name": "VAT (MOMS)",
+    "digital_tax_rate": 0.25,
+    "physical_tax_rate": 0.25,
+    "reverse_charge": true,
+    "authority": "Danish Tax Agency (Skattestyrelsen)",
+    "currency": "DKK",
+    "flag": "🇩🇰"
+  },
+  {
+    "country": "CH",
+    "name": "Switzerland",
+    "tax_name": "VAT (MWST)",
+    "digital_tax_rate": 0.077,
+    "physical_tax_rate": 0.077,
+    "reverse_charge": true,
+    "authority": "Federal Tax Administration (FTA)",
+    "currency": "CHF",
+    "flag": "🇨🇭"
+  },
+  {
+    "country": "NZ",
+    "name": "New Zealand",
+    "tax_name": "GST",
+    "digital_tax_rate": 0.15,
+    "physical_tax_rate": 0.15,
+    "reverse_charge": false,
+    "authority": "Inland Revenue (IR)",
+    "currency": "NZD",
+    "flag": "🇳🇿"
+  },
+  {
+    "country": "ZA",
+    "name": "South Africa",
+    "tax_name": "VAT",
+    "digital_tax_rate": 0.15,
+    "physical_tax_rate": 0.15,
+    "reverse_charge": false,
+    "authority": "South African Revenue Service (SARS)",
+    "currency": "ZAR",
+    "flag": "🇿🇦"
+  },
+  {
+    "country": "AE",
+    "name": "United Arab Emirates",
+    "tax_name": "VAT",
+    "digital_tax_rate": 0.05,
+    "physical_tax_rate": 0.05,
+    "reverse_charge": false,
+    "authority": "Federal Tax Authority (FTA)",
+    "currency": "AED",
+    "flag": "🇦🇪"
+  }
+]
