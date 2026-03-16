@@ -2,6 +2,12 @@
 
 A hackathon MVP web application for calculating cross-border tax for SMB sellers across 20 countries.
 
+## Key Features
+- **USD Standardization**: All calculations are natively processed and displayed in USD ($) for global consistency.
+- **US State Tax Support**: Accurate state-level sales tax calculation for the United States (CA, NY, TX, FL, WA).
+- **Professional Result Summary**: Visual cards for Tax Rate, Tax Amount, and Total Price above every invoice preview.
+- **Project Tracking**: Integrated history and exportable PDF invoices.
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -117,7 +123,7 @@ Global-Tax-Engine/
     │   │       └── HistoryTable.svelte
     │   └── routes/
     │       ├── +layout.svelte     # Root layout
-    │       ├── +page.svelte       # Landing page
+    │       ├── +page.svelte       # Landing page (with Coming Soon)
     │       ├── dashboard/
     │       │   └── +page.svelte   # Calculator
     │       └── history/
@@ -134,19 +140,27 @@ Calculate tax for a sale.
 
 **Request:**
 ```json
-{ "amount": 1000, "country": "DE", "productType": "digital", "buyerType": "B2C" }
+{ 
+  "amount": 1000, 
+  "country": "US", 
+  "destState": "CA", 
+  "productType": "digital", 
+  "buyerType": "B2C" 
+}
 ```
+*Note: `destState` is required when country is "US".*
+
 **Response:**
 ```json
 {
-  "taxRate": 0.19,
-  "taxRatePercent": "19.0%",
-  "taxAmount": 190.00,
-  "total": 1190.00,
-  "authority": "German Federal Central Tax Office (BZSt)",
-  "taxName": "VAT (MwSt)",
-  "countryName": "Germany",
-  "currency": "EUR",
+  "taxRate": 0.0725,
+  "taxRatePercent": "7.25%",
+  "taxAmount": 72.50,
+  "total": 1072.50,
+  "authority": "California Department of Tax and Fee Administration",
+  "taxName": "Sales Tax",
+  "countryName": "United States",
+  "currency": "USD",
   "reverseCharge": false
 }
 ```
@@ -155,13 +169,20 @@ Calculate tax for a sale.
 Generate a PDF invoice. Returns a downloadable PDF file.
 
 ### `GET /api/history`
-Returns all past calculation records.
+Returns all past calculation records (standardized in USD).
 
 ### `POST /api/history`
 Saves a new calculation record.
 
 ### `GET /api/tax/countries`
 Returns all 20 supported countries for the dropdown.
+
+---
+
+## Coming Soon 🚀
+- **Stripe Tax Integration**: Seamlessly sync calculations with your Stripe checkout.
+- **100+ Country Support**: Expanding dataset to cover global jurisdictions.
+- **AI Tax Assistant**: Instant answers to complex tax compliance questions.
 
 ---
 
