@@ -45,7 +45,7 @@
       Generating...
     {:else}
       <FileText size={16} />
-      Generate Invoice
+      Download PDF Invoice
     {/if}
   </button>
   {#if error}

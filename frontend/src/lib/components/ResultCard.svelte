@@ -1,124 +1,145 @@
 <!--
-  ResultCard.svelte - Tax Calculation Result Display
-
-  What this component does:
-    Shows the computed tax breakdown after a calculation:
-    tax rate, tax amount, total price, and tax authority.
-    Also renders action buttons for invoice generation and JSON export.
-
-  How it interacts with the system:
-    - Receives the "result" prop from Dashboard page
-    - Contains InvoiceButton and export logic
-    - Uses api.js for invoice generation and JSON export
-
-  Props:
-    result {object} - The full tax breakdown object from the backend
+  ResultCard.svelte - Tax Calculation Result Display (Invoice Preview)
 -->
 <script>
-  import { TrendingUp, Building2, FileText, Download, CheckCircle, AlertCircle } from 'lucide-svelte';
+  import { FileText } from 'lucide-svelte';
   import InvoiceButton from './InvoiceButton.svelte';
-  import { exportJSON } from '$lib/api.js';
 
   export let result;
-
-  function handleExportJSON() {
-    exportJSON(result);
-  }
 </script>
 
 {#if result}
-<div class="card animate-fade-up space-y-6">
+<div class="space-y-4 animate-fade-up">
 
-  <!-- Header -->
-  <div class="flex items-center gap-3">
-    <div class="icon-box-mint">
-      <CheckCircle size={22} color="white" />
+  <!-- Top Summary -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 max-w-2xl mx-auto mb-6">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <span class="text-gray-400 font-normal tracking-wide">{result.countryCode}</span> {result.countryName}
+        </h2>
+        <p class="text-lg text-gray-400 mt-2 font-medium">
+          {result.taxName} · {result.buyerType} · {result.productType}
+        </p>
+      </div>
+      <div class="badge {result.reverseCharge ? 'badge-orange text-[#FF7A18] bg-[#FF7A18]/10' : 'badge-purple'} px-4 py-2">
+        {result.reverseCharge ? 'Reverse Charge' : 'Standard Rate'}
+      </div>
     </div>
-    <div>
-      <h2 class="text-xl font-bold text-gray-900">Tax Breakdown</h2>
-      <p class="text-sm text-gray-500">{result.countryName} · {result.taxName}</p>
+
+    <!-- Metrics Grid -->
+    <div class="flex flex-wrap gap-3 mb-8 w-full">
+      <div class="flex-1 min-w-max bg-gray-50 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
+        <p class="text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider mb-1.5 whitespace-nowrap">Tax Rate</p>
+        <p class="text-2xl lg:text-3xl xl:text-4xl font-extrabold text-primary whitespace-nowrap leading-tight tracking-tight">{result.taxRatePercent}</p>
+      </div>
+      <div class="flex-1 min-w-max bg-gray-50 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
+        <p class="text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider mb-1.5 whitespace-nowrap">Tax Amount</p>
+        <p class="text-2xl lg:text-3xl xl:text-4xl font-extrabold text-gray-900 whitespace-nowrap leading-tight tracking-tight">${result.taxAmount.toFixed(2)}</p>
+      </div>
+      <div class="flex-1 min-w-max bg-emerald-50 rounded-2xl p-3 sm:p-4 text-center border border-emerald-100 flex flex-col justify-center">
+        <p class="text-xs sm:text-sm font-bold text-emerald-600 uppercase tracking-wider mb-1.5 whitespace-nowrap">Total Price</p>
+        <p class="text-2xl lg:text-3xl xl:text-4xl font-extrabold text-[#00D9A5] whitespace-nowrap leading-tight tracking-tight">${result.total.toFixed(2)}</p>
+      </div>
     </div>
+
+    <!-- Progress Bar (Subtotal vs Tax) -->
+    <div class="mb-8">
+      <div class="flex justify-between text-sm font-medium text-gray-400 mb-3">
+        <span>Subtotal</span>
+        <span>Tax</span>
+      </div>
+      <div class="h-3 w-full bg-gray-100 rounded-full overflow-hidden flex">
+        <!-- Subtotal portion -->
+        <div class="h-full bg-gradient-to-r from-primary to-indigo-400" style="width: {result.total > 0 ? (result.originalAmount / result.total) * 100 : 0}%"></div>
+        <!-- Tax portion -->
+        <div class="h-full bg-[#00D9A5]" style="width: {result.total > 0 ? (result.taxAmount / result.total) * 100 : 0}%"></div>
+      </div>
+    </div>
+
+    <!-- Tax Authority Block -->
+    <div class="bg-gray-50 rounded-2xl p-5 flex items-center gap-5 mb-6">
+      <div class="w-12 h-12 rounded-xl bg-indigo-100 text-primary flex items-center justify-center shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+      </div>
+      <div>
+        <p class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Tax Authority</p>
+        <p class="text-lg font-bold text-gray-800">{result.authority}</p>
+      </div>
+    </div>
+    
+    <!-- Note -->
+    <div class="bg-[#F4F6FB] border border-blue-50 rounded-2xl p-5 flex items-start gap-4">
+      <div class="text-primary font-bold mt-0.5 text-lg">i</div>
+      <p class="text-base text-blue-900">
+        {result.countryName} applies {result.taxRatePercent} {result.taxName}. 
+        {#if result.reverseCharge} B2B sales use EU reverse charge.{/if}
+      </p>
+    </div>
+
   </div>
 
-  <!-- Reverse charge notice -->
-  {#if result.reverseCharge}
-    <div class="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3">
-      <AlertCircle size={16} class="mt-0.5 shrink-0" />
-      <span><strong>Reverse Charge Applied</strong> — B2B transaction. The buyer accounts for VAT.</span>
-    </div>
-  {/if}
-
-  <!-- Stats grid -->
-  <div class="grid grid-cols-2 gap-4">
-
-    <!-- Tax Rate -->
-    <div class="bg-bg rounded-2xl p-4 border border-gray-100">
-      <div class="flex items-center gap-2 mb-1">
-        <TrendingUp size={14} class="text-primary" />
-        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Rate</span>
-      </div>
-      <p class="text-3xl font-bold" style="color: #6C63FF">
-        {(result.taxRate * 100).toFixed(1)}%
-      </p>
-      <p class="text-xs text-gray-400 mt-1">{result.taxName}</p>
-    </div>
-
-    <!-- Tax Amount -->
-    <div class="bg-bg rounded-2xl p-4 border border-gray-100">
-      <div class="flex items-center gap-2 mb-1">
-        <FileText size={14} style="color: #FF7A18" />
-        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tax Amount</span>
-      </div>
-      <p class="text-3xl font-bold" style="color: #FF7A18">
-        {result.currency} {result.taxAmount.toFixed(2)}
-      </p>
-      <p class="text-xs text-gray-400 mt-1">Added to base price</p>
-    </div>
-
-    <!-- Original Amount -->
-    <div class="bg-bg rounded-2xl p-4 border border-gray-100">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-xs">💰</span>
-        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Base Price</span>
-      </div>
-      <p class="text-2xl font-bold text-gray-700">
-        {result.currency} {result.originalAmount.toFixed(2)}
-      </p>
-      <p class="text-xs text-gray-400 mt-1">Before tax</p>
-    </div>
-
-    <!-- Total -->
-    <div class="rounded-2xl p-4 border-2" style="background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(0,217,165,0.08)); border-color: rgba(108,99,255,0.2)">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-xs">✅</span>
-        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</span>
-      </div>
-      <p class="text-2xl font-bold gradient-text">
-        {result.currency} {result.total.toFixed(2)}
-      </p>
-      <p class="text-xs text-gray-400 mt-1">Buyer pays</p>
-    </div>
+  <div class="flex items-center gap-2 mb-2">
+    <FileText size={20} class="text-gray-400" />
+    <h3 class="font-bold text-gray-700">Invoice Preview</h3>
   </div>
 
-  <!-- Tax Authority -->
-  <div class="flex items-start gap-3 bg-gray-50 rounded-xl p-4 border border-gray-100">
-    <Building2 size={18} class="text-gray-400 shrink-0 mt-0.5" />
-    <div>
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">Tax Authority</p>
-      <p class="text-sm font-semibold text-gray-800">{result.authority}</p>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-lg font-mono text-sm leading-loose">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4 font-sans font-bold text-gray-900 border-b border-gray-100 pb-4">
+      <span class="tracking-widest">INVOICE</span>
+      <span>Global Tax Engine</span>
     </div>
+
+    <!-- Subtotal & Tax details -->
+    <div class="flex justify-between text-gray-500">
+      <span>Product</span>
+      <span class="text-gray-900">Digital Service</span>
+    </div>
+    <div class="flex justify-between text-gray-500">
+      <span>Subtotal</span>
+      <span class="text-gray-900">${result.originalAmount.toFixed(2)}</span>
+    </div>
+    <div class="flex justify-between text-gray-500 mb-4 border-b border-gray-100 pb-4">
+      <span>{result.taxName} ({result.taxRatePercent})</span>
+      <span class="text-gray-900">${result.taxAmount.toFixed(2)}</span>
+    </div>
+
+    <!-- Gross Revenue -->
+    <div class="flex justify-between font-bold text-primary mb-6">
+      <span>TOTAL (Gross Revenue)</span>
+      <span>${result.total.toFixed(2)}</span>
+    </div>
+
+    <!-- Deductions -->
+    <div class="flex justify-between text-gray-500">
+      <span>Tax to Remit</span>
+      <span>-${result.taxAmount.toFixed(2)}</span>
+    </div>
+    <div class="flex justify-between text-gray-500 mb-4 border-b border-gray-100 pb-4">
+      <span>Corporate Tax ({result.corporateTaxRatePercent})</span>
+      <span>-${result.corporateTaxAmount.toFixed(2)}</span>
+    </div>
+
+    <!-- Net Profit -->
+    <div class="flex justify-between font-bold" style="color: #00D9A5;">
+      <span>NET PROFIT</span>
+      <span>${result.netProfit.toFixed(2)}</span>
+    </div>
+
+    <!-- Authority Footer -->
+    <div class="mt-6 pt-4 text-xs text-gray-400 font-sans">
+      Authority: {result.authority}
+    </div>
+
   </div>
 
   <!-- Action Buttons -->
-  <div class="flex gap-3">
+  <div class="flex gap-3 mt-4">
     <InvoiceButton {result} />
-    <button
-      on:click={handleExportJSON}
-      class="btn-ghost flex-1 justify-center py-3"
-    >
-      <Download size={16} />
-      Export JSON
-    </button>
   </div>
 
 </div>

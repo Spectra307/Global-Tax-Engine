@@ -37,13 +37,16 @@ const { getRuleByCountry } = require('./datasetLoader');
  *
  * @throws {Error} If country is not supported or inputs are invalid
  */
-function calculateTax(amount, country, productType, buyerType) {
+function calculateTax(amount, destCountry, sourceCountry, productType, buyerType, destState = null) {
   // --- Input Validation ---
   if (!amount || isNaN(amount) || amount <= 0) {
     throw new Error('Amount must be a positive number.');
   }
-  if (!country) {
-    throw new Error('Country code is required.');
+  if (!destCountry) {
+    throw new Error('Destination country code is required.');
+  }
+  if (!sourceCountry) {
+    throw new Error('Source country code is required.');
   }
   if (!['digital', 'physical'].includes(productType)) {
     throw new Error('Product type must be "digital" or "physical".');
@@ -52,45 +55,116 @@ function calculateTax(amount, country, productType, buyerType) {
     throw new Error('Buyer type must be "B2B" or "B2C".');
   }
 
-  // --- Find Country Rule ---
-  const rule = getRuleByCountry(country);
-  if (!rule) {
+  // --- Find Country Rules ---
+  const destRule = getRuleByCountry(destCountry);
+  if (!destRule) {
     throw new Error(
-      `Country "${country}" is not supported. Please choose from the 20 supported countries.`
+      `Destination country "${destCountry}" is not supported.`
     );
   }
+
+  const sourceRule = getRuleByCountry(sourceCountry);
+  if (!sourceRule) {
+    throw new Error(
+      `Source country "${sourceCountry}" is not supported.`
+    );
+  }
+
+  // --- Standardized on USD ---
+  const parsedAmountUSD = parseFloat(amount);
+  const convertedAmount = parsedAmountUSD;
 
   // --- Determine Tax Rate ---
   // Pick the rate based on product type (digital vs physical)
   let taxRate =
-    productType === 'digital' ? rule.digital_tax_rate : rule.physical_tax_rate;
+    productType === 'digital' ? destRule.digital_tax_rate : destRule.physical_tax_rate;
+
+  // Apply state-specific US tax rates if applicable
+  if (destCountry === 'US' && destState) {
+    const stateRates = {
+      'CA': 0.0725, // California
+      'NY': 0.088,  // New York
+      'TX': 0.0625, // Texas
+      'FL': 0.06,   // Florida
+      'WA': 0.065   // Washington
+    };
+    if (stateRates[destState] !== undefined) {
+      taxRate = stateRates[destState];
+    }
+  }
 
   // Apply reverse charge: if the country supports reverse charge AND the buyer is a business (B2B),
   // then the buyer accounts for their own VAT — so the seller charges 0% tax.
   let reverseCharge = false;
-  if (rule.reverse_charge && buyerType === 'B2B') {
+  if (destRule.reverse_charge && buyerType === 'B2B') {
     taxRate = 0;
     reverseCharge = true;
   }
 
   // --- Calculate Tax ---
-  const parsedAmount = parseFloat(amount);
-  const taxAmount = parseFloat((parsedAmount * taxRate).toFixed(2));
-  const total = parseFloat((parsedAmount + taxAmount).toFixed(2));
+  // 1. Calculate Tax to Remit (Destination VAT/GST)
+  const taxAmount = parseFloat((convertedAmount * taxRate).toFixed(2));
+  
+  // 2. Calculate Gross Revenue (What the buyer pays)
+  const total = parseFloat((convertedAmount + taxAmount).toFixed(2)); // Base + VAT
+
+  // 3. Calculate Corporate Tax based on the SOURCE country rate, applied to the Net Revenue (Base Price)
+  const corporateTaxRate = sourceRule.corporate_tax_rate || 0.20; // Defaulting to 20% if missing
+  const corporateTaxAmount = parseFloat((convertedAmount * corporateTaxRate).toFixed(2));
+
+  // 4. Calculate Net Profit (Base Price - Corporate Tax)
+  const netProfit = parseFloat((convertedAmount - corporateTaxAmount).toFixed(2));
 
   return {
     taxRate,
     taxRatePercent: `${(taxRate * 100).toFixed(1)}%`,
     taxAmount,
     total,
-    authority: rule.authority,
-    taxName: rule.tax_name,
-    countryName: rule.name,
-    countryCode: rule.country,
-    currency: rule.currency,
+    grossRevenue: total,
+    corporateTaxRate,
+    corporateTaxRatePercent: `${(corporateTaxRate * 100).toFixed(1)}%`,
+    corporateTaxAmount,
+    netProfit,
+    authority: destRule.authority,
+    taxName: destRule.tax_name,
+    countryName: destRule.name,
+    countryCode: destRule.country,
+    sourceCountryCode: sourceRule.country,
+    currency: 'USD',
     reverseCharge,
-    originalAmount: parsedAmount
+    originalAmount: convertedAmount,
+    originalAmountUSD: parsedAmountUSD,
+    exchangeRate: 1.0
   };
 }
 
-module.exports = { calculateTax };
+/**
+ * Iterates through all countries and returns an array of what taxes WOULD be
+ * for each country.
+ */
+function calculateWhatIf(amount, productType, buyerType) {
+  const { getAllRules } = require('./datasetLoader');
+  const allRules = getAllRules();
+  
+  const results = allRules.map(rule => {
+    let taxRate = productType === 'digital' ? rule.digital_tax_rate : rule.physical_tax_rate;
+    if (rule.reverse_charge && buyerType === 'B2B') {
+      taxRate = 0;
+    }
+    
+    // Assuming amount passed is in USD.
+    const taxAmountUSD = amount * taxRate;
+    
+    return {
+      countryCode: rule.country,
+      countryName: rule.name,
+      taxRate: taxRate,
+      taxRatePercent: `${(taxRate * 100).toFixed(0)}%`, // Keeping it zero decimal places for preview
+      taxAmountUSD: taxAmountUSD,
+    };
+  });
+
+  return results.sort((a, b) => b.taxAmountUSD - a.taxAmountUSD);
+}
+
+module.exports = { calculateTax, calculateWhatIf };

@@ -26,14 +26,14 @@ export async function fetchCountries() {
 
 /**
  * Calculates tax for a sale.
- * @param {{ amount: number, country: string, productType: string, buyerType: string }} params
+ * @param {{ amount: number, destCountry: string, sourceCountry: string, productType: string, buyerType: string, destState?: string }} params
  * @returns {object} Tax breakdown result
  */
-export async function calculateTax({ amount, country, productType, buyerType }) {
+export async function calculateTax({ amount, destCountry, sourceCountry, productType, buyerType, destState }) {
   const res = await fetch(`${API_BASE}/tax`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount, country, productType, buyerType })
+    body: JSON.stringify({ amount, destCountry: destCountry, sourceCountry: sourceCountry, productType, buyerType, destState })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Tax calculation failed');
@@ -86,23 +86,26 @@ export async function generateInvoice(taxResult) {
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+  a.style.display = 'none';
   a.href = url;
   a.download = `tax-invoice-${taxResult.countryCode}-${Date.now()}.pdf`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
 /**
- * Exports a tax result as a JSON file download.
- * @param {object} taxResult - The tax result to export
+ * Fetches what-if scenario breakdown across all countries.
  */
-export function exportJSON(taxResult) {
-  const json = JSON.stringify(taxResult, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `tax-result-${taxResult.countryCode}-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+export async function getWhatIfScenario({ amount, productType, buyerType }) {
+  const res = await fetch(`${API_BASE}/tax/whatif`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, productType, buyerType })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'What-If generation failed');
+  return data.results;
 }
+

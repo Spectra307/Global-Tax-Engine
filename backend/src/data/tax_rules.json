@@ -3,23 +3,25 @@
     "country": "US",
     "name": "United States",
     "tax_name": "Sales Tax",
-    "digital_tax_rate": 0.0,
+    "digital_tax_rate": 0,
     "physical_tax_rate": 0.07,
     "reverse_charge": false,
     "authority": "IRS (Internal Revenue Service)",
     "currency": "USD",
-    "flag": "🇺🇸"
+    "flag": "🇺🇸",
+    "corporate_tax_rate": 0.21
   },
   {
     "country": "GB",
     "name": "United Kingdom",
     "tax_name": "VAT",
-    "digital_tax_rate": 0.20,
-    "physical_tax_rate": 0.20,
+    "digital_tax_rate": 0.2,
+    "physical_tax_rate": 0.2,
     "reverse_charge": true,
     "authority": "HMRC (His Majesty's Revenue & Customs)",
     "currency": "GBP",
-    "flag": "🇬🇧"
+    "flag": "🇬🇧",
+    "corporate_tax_rate": 0.2
   },
   {
     "country": "DE",
@@ -30,18 +32,20 @@
     "reverse_charge": true,
     "authority": "German Federal Central Tax Office (BZSt)",
     "currency": "EUR",
-    "flag": "🇩🇪"
+    "flag": "🇩🇪",
+    "corporate_tax_rate": 0.15
   },
   {
     "country": "FR",
     "name": "France",
     "tax_name": "VAT (TVA)",
-    "digital_tax_rate": 0.20,
-    "physical_tax_rate": 0.20,
+    "digital_tax_rate": 0.2,
+    "physical_tax_rate": 0.2,
     "reverse_charge": true,
     "authority": "Direction Générale des Finances Publiques",
     "currency": "EUR",
-    "flag": "🇫🇷"
+    "flag": "🇫🇷",
+    "corporate_tax_rate": 0.25
   },
   {
     "country": "IT",
@@ -52,7 +56,8 @@
     "reverse_charge": true,
     "authority": "Agenzia delle Entrate",
     "currency": "EUR",
-    "flag": "🇮🇹"
+    "flag": "🇮🇹",
+    "corporate_tax_rate": 0.24
   },
   {
     "country": "ES",
@@ -63,7 +68,8 @@
     "reverse_charge": true,
     "authority": "Agencia Tributaria",
     "currency": "EUR",
-    "flag": "🇪🇸"
+    "flag": "🇪🇸",
+    "corporate_tax_rate": 0.25
   },
   {
     "country": "CA",
@@ -74,29 +80,32 @@
     "reverse_charge": false,
     "authority": "Canada Revenue Agency (CRA)",
     "currency": "CAD",
-    "flag": "🇨🇦"
+    "flag": "🇨🇦",
+    "corporate_tax_rate": 0.15
   },
   {
     "country": "AU",
     "name": "Australia",
     "tax_name": "GST",
-    "digital_tax_rate": 0.10,
-    "physical_tax_rate": 0.10,
+    "digital_tax_rate": 0.1,
+    "physical_tax_rate": 0.1,
     "reverse_charge": false,
     "authority": "Australian Taxation Office (ATO)",
     "currency": "AUD",
-    "flag": "🇦🇺"
+    "flag": "🇦🇺",
+    "corporate_tax_rate": 0.3
   },
   {
     "country": "JP",
     "name": "Japan",
     "tax_name": "Consumption Tax",
-    "digital_tax_rate": 0.10,
-    "physical_tax_rate": 0.10,
+    "digital_tax_rate": 0.1,
+    "physical_tax_rate": 0.1,
     "reverse_charge": false,
     "authority": "National Tax Agency (NTA)",
     "currency": "JPY",
-    "flag": "🇯🇵"
+    "flag": "🇯🇵",
+    "corporate_tax_rate": 0.23
   },
   {
     "country": "IN",
@@ -107,7 +116,8 @@
     "reverse_charge": true,
     "authority": "Central Board of Indirect Taxes (CBIC)",
     "currency": "INR",
-    "flag": "🇮🇳"
+    "flag": "🇮🇳",
+    "corporate_tax_rate": 0.25
   },
   {
     "country": "BR",
@@ -118,7 +128,8 @@
     "reverse_charge": false,
     "authority": "Receita Federal do Brasil",
     "currency": "BRL",
-    "flag": "🇧🇷"
+    "flag": "🇧🇷",
+    "corporate_tax_rate": 0.34
   },
   {
     "country": "SG",
@@ -129,7 +140,8 @@
     "reverse_charge": false,
     "authority": "Inland Revenue Authority of Singapore (IRAS)",
     "currency": "SGD",
-    "flag": "🇸🇬"
+    "flag": "🇸🇬",
+    "corporate_tax_rate": 0.17
   },
   {
     "country": "NL",
@@ -140,7 +152,8 @@
     "reverse_charge": true,
     "authority": "Dutch Tax and Customs Administration (Belastingdienst)",
     "currency": "EUR",
-    "flag": "🇳🇱"
+    "flag": "🇳🇱",
+    "corporate_tax_rate": 0.25
   },
   {
     "country": "SE",
@@ -151,7 +164,8 @@
     "reverse_charge": true,
     "authority": "Swedish Tax Agency (Skatteverket)",
     "currency": "SEK",
-    "flag": "🇸🇪"
+    "flag": "🇸🇪",
+    "corporate_tax_rate": 0.2
   },
   {
     "country": "NO",
@@ -162,7 +176,8 @@
     "reverse_charge": true,
     "authority": "Norwegian Tax Administration (Skatteetaten)",
     "currency": "NOK",
-    "flag": "🇳🇴"
+    "flag": "🇳🇴",
+    "corporate_tax_rate": 0.22
   },
   {
     "country": "DK",
@@ -173,7 +188,8 @@
     "reverse_charge": true,
     "authority": "Danish Tax Agency (Skattestyrelsen)",
     "currency": "DKK",
-    "flag": "🇩🇰"
+    "flag": "🇩🇰",
+    "corporate_tax_rate": 0.22
   },
   {
     "country": "CH",
@@ -184,7 +200,8 @@
     "reverse_charge": true,
     "authority": "Federal Tax Administration (FTA)",
     "currency": "CHF",
-    "flag": "🇨🇭"
+    "flag": "🇨🇭",
+    "corporate_tax_rate": 0.08
   },
   {
     "country": "NZ",
@@ -195,7 +212,8 @@
     "reverse_charge": false,
     "authority": "Inland Revenue (IR)",
     "currency": "NZD",
-    "flag": "🇳🇿"
+    "flag": "🇳🇿",
+    "corporate_tax_rate": 0.28
   },
   {
     "country": "ZA",
@@ -206,7 +224,8 @@
     "reverse_charge": false,
     "authority": "South African Revenue Service (SARS)",
     "currency": "ZAR",
-    "flag": "🇿🇦"
+    "flag": "🇿🇦",
+    "corporate_tax_rate": 0.27
   },
   {
     "country": "AE",
@@ -217,6 +236,7 @@
     "reverse_charge": false,
     "authority": "Federal Tax Authority (FTA)",
     "currency": "AED",
-    "flag": "🇦🇪"
+    "flag": "🇦🇪",
+    "corporate_tax_rate": 0.09
   }
 ]

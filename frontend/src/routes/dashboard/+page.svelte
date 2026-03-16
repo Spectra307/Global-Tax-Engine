@@ -14,15 +14,27 @@
 <script>
   import TaxForm from '$lib/components/TaxForm.svelte';
   import ResultCard from '$lib/components/ResultCard.svelte';
-  import { saveHistory } from '$lib/api.js';
+  import WhatIfScenario from '$lib/components/WhatIfScenario.svelte';
+  import { saveHistory, getWhatIfScenario } from '$lib/api.js';
   import { BarChart3 } from 'lucide-svelte';
 
   let result = null;
+  let whatIfData = [];
 
   async function handleResult(event) {
     result = event.detail;
     // Auto-save to history (non-blocking — doesn't affect UI)
-    await saveHistory(result);
+    saveHistory(result);
+
+    try {
+      whatIfData = await getWhatIfScenario({
+        amount: result.originalAmountUSD,
+        productType: result.productType,
+        buyerType: result.buyerType
+      });
+    } catch (e) {
+      console.error("Failed to load what-if scenario", e);
+    }
   }
 </script>
 
@@ -56,6 +68,9 @@
     <div>
       {#if result}
         <ResultCard {result} />
+        {#if whatIfData.length > 0}
+          <WhatIfScenario data={whatIfData} amount={result.originalAmountUSD} productType={result.productType} buyerType={result.buyerType} />
+        {/if}
       {:else}
         <!-- Placeholder card shown before first calculation -->
         <div class="card border-2 border-dashed border-gray-200 flex flex-col items-center justify-center py-20 text-center gap-4">

@@ -23,10 +23,11 @@
 
   const dispatch = createEventDispatcher();
 
-  // Form state
   let amount = '';
   let productType = 'digital';
-  let country = '';
+  let destCountry = '';
+  let destState = '';
+  let sourceCountry = '';
   let buyerType = 'B2C';
 
   // UI state
@@ -42,7 +43,10 @@
   onMount(async () => {
     try {
       countries = await fetchCountries();
-      if (countries.length > 0) country = countries[0].code;
+      if (countries.length > 0) {
+        destCountry = countries[0].code;
+        sourceCountry = countries[0].code;
+      }
     } catch (e) {
       error = 'Failed to load countries. Is the backend running?';
     } finally {
@@ -56,10 +60,14 @@
       error = 'Please enter a valid sale amount greater than 0.';
       return;
     }
+    if (destCountry === 'US' && !destState) {
+      error = 'Please select a US State.';
+      return;
+    }
     loading = true;
     try {
-      const result = await calculateTax({ amount: parseFloat(amount), country, productType, buyerType });
-      dispatch('result', result);
+      const result = await calculateTax({ amount: parseFloat(amount), destCountry, sourceCountry, productType, buyerType, destState });
+      dispatch('result', { ...result, productType, buyerType });
     } catch (e) {
       error = e.message;
     } finally {
@@ -100,8 +108,8 @@
     </div>
 
     <!-- Product Type -->
-    <div>
-      <label class="form-label">Product Type</label>
+    <fieldset class="border-0 p-0 m-0 min-w-0">
+      <legend class="form-label">Product Type</legend>
       <div class="grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -120,28 +128,65 @@
           📦 Physical
         </button>
       </div>
-    </div>
+    </fieldset>
+
+    <!-- Location Routing -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Source Country -->
+      <div>
+        <label for="sourceCountry" class="form-label">Source Country</label>
+        {#if loadingCountries}
+          <div class="form-input flex items-center gap-2 text-gray-400">
+            <Loader2 size={16} class="animate-spin" /> Loading...
+          </div>
+        {:else}
+          <select id="sourceCountry" bind:value={sourceCountry} class="form-input">
+            {#each countries as c}
+              <option value={c.code}>{c.flag} {c.name}</option>
+            {/each}
+          </select>
+        {/if}
+      </div>
 
     <!-- Buyer Country -->
-    <div>
-      <label for="country" class="form-label">Buyer Country</label>
-      {#if loadingCountries}
-        <div class="form-input flex items-center gap-2 text-gray-400">
-          <Loader2 size={16} class="animate-spin" /> Loading countries...
-        </div>
-      {:else}
-        <select id="country" bind:value={country} class="form-input">
-          {#each countries as c}
-            <option value={c.code}>{c.flag} {c.name} ({c.taxName})</option>
-          {/each}
-        </select>
-      {/if}
+      <div>
+        <label for="destCountry" class="form-label">Buyer Country</label>
+        {#if loadingCountries}
+          <div class="form-input flex items-center gap-2 text-gray-400">
+            <Loader2 size={16} class="animate-spin" /> Loading...
+          </div>
+        {:else}
+          <select id="destCountry" bind:value={destCountry} class="form-input" on:change={() => destState = ''}>
+            {#each countries as c}
+              <option value={c.code}>{c.flag} {c.name}</option>
+            {/each}
+          </select>
+        {/if}
+      </div>
     </div>
 
-    <!-- Buyer Type -->
-    <div>
+    <!-- US State Dropdown -->
+    {#if destCountry === 'US'}
+    <div class="animate-fade-in mt-4">
       <div class="flex items-center gap-2 mb-1.5">
-        <label class="form-label mb-0">Buyer Type</label>
+        <label for="destState" class="form-label mb-0">US State</label>
+        <span class="text-xs font-semibold text-[#FF7A18] bg-[#FF7A18]/10 px-2 py-0.5 rounded-full">Required for USA</span>
+      </div>
+      <select id="destState" bind:value={destState} class="form-input">
+        <option value="" disabled selected>— Select a state —</option>
+        <option value="CA">California (7.25%)</option>
+        <option value="NY">New York (8.80%)</option>
+        <option value="TX">Texas (6.25%)</option>
+        <option value="FL">Florida (6.00%)</option>
+        <option value="WA">Washington (6.50%)</option>
+      </select>
+    </div>
+    {/if}
+
+    <!-- Buyer Type -->
+    <fieldset class="border-0 p-0 m-0 min-w-0">
+      <legend class="flex items-center gap-2 mb-1.5">
+        <span class="form-label mb-0">Buyer Type</span>
         <!-- Tooltip trigger -->
         <button
           type="button"
@@ -160,7 +205,7 @@
             <strong>B2C (Business to Consumer):</strong> Standard tax rate always applies.
           </div>
         {/if}
-      </div>
+      </legend>
       <div class="grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -180,7 +225,7 @@
           🏢 B2B Business
         </button>
       </div>
-    </div>
+    </fieldset>
 
     <!-- Error message -->
     {#if error}

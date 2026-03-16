@@ -15,7 +15,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { calculateTax } = require('../services/taxEngine');
+const { calculateTax, calculateWhatIf } = require('../services/taxEngine');
 const { getAllRules } = require('../services/datasetLoader');
 
 /**
@@ -39,33 +39,50 @@ router.get('/countries', (req, res) => {
  * Calculates tax for a cross-border sale.
  *
  * Request body:
- *   { amount: number, country: string, productType: string, buyerType: string }
- *
- * Response:
- *   { taxRate, taxAmount, total, authority, taxName, countryName, ... }
+ *   { amount: number, sourceCountry: string, destCountry: string, productType: string, buyerType: string }
  */
 router.post('/', (req, res) => {
   try {
-    const { amount, country, productType, buyerType } = req.body;
+    const { amount, sourceCountry, destCountry, productType, buyerType, destState } = req.body;
 
-    // Validate that all required fields are present
-    if (!amount || !country || !productType || !buyerType) {
+    if (!amount || !sourceCountry || !destCountry || !productType || !buyerType) {
       return res.status(400).json({
-        error: 'Missing required fields: amount, country, productType, buyerType'
+        error: 'Missing required fields: amount, sourceCountry, destCountry, productType, buyerType'
       });
     }
 
-    // Run the tax engine
     const result = calculateTax(
       parseFloat(amount),
-      country,
+      destCountry,
+      sourceCountry,
       productType,
-      buyerType
+      buyerType,
+      destState
     );
 
     res.json(result);
   } catch (err) {
-    // Return a friendly error message to the frontend
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/tax/whatif
+ * Calculates what-if taxation for all countries
+ */
+router.post('/whatif', (req, res) => {
+  try {
+    const { amount, productType, buyerType } = req.body;
+    
+    if (!amount || !productType || !buyerType) {
+      return res.status(400).json({
+        error: 'Missing required fields: amount, productType, buyerType'
+      });
+    }
+
+    const results = calculateWhatIf(parseFloat(amount), productType, buyerType);
+    res.json({ results });
+  } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });

@@ -20,37 +20,25 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 /**
  * POST /api/invoice
  * Generates a PDF invoice from a tax calculation result.
- *
- * Request body:
- *   { amount, country, countryName, taxRate, taxAmount, total, taxName,
- *     buyerType, productType, authority, currency }
  */
 router.post('/', async (req, res) => {
   try {
     const {
-      originalAmount,
-      taxRate,
-      taxAmount,
-      total,
-      authority,
-      taxName,
-      countryName,
-      countryCode,
-      currency,
-      buyerType,
-      productType,
-      reverseCharge,
-      taxRatePercent
+      originalAmount, taxRate, taxAmount, total, authority,
+      taxName, countryName, countryCode, currency, buyerType,
+      productType, reverseCharge, taxRatePercent,
+      grossRevenue, corporateTaxRate, corporateTaxRatePercent,
+      corporateTaxAmount, netProfit, sourceCountryCode
     } = req.body;
 
-    // ─── Input Validation & Type Conversion ────────────────────────────────────
-    // Ensure all numeric values are properly converted to numbers for calculations
     const numOriginalAmount = parseFloat(originalAmount) || 0;
     const numTaxRate = parseFloat(taxRate) || 0;
     const numTaxAmount = parseFloat(taxAmount) || 0;
     const numTotal = parseFloat(total) || 0;
+    const numGrossRev = parseFloat(grossRevenue) || numTotal;
+    const numCorpTax = parseFloat(corporateTaxAmount) || 0;
+    const numNetProfit = parseFloat(netProfit) || (numOriginalAmount - numCorpTax);
     
-    // Ensure string values
     const strCurrency = String(currency || 'USD');
     const strCountryName = String(countryName || 'Unknown');
     const strCountryCode = String(countryCode || 'XX');
@@ -58,188 +46,112 @@ router.post('/', async (req, res) => {
     const strTaxName = String(taxName || 'Tax');
     const strBuyerType = String(buyerType || 'B2C');
     const strProductType = String(productType || 'digital');
-    const strTaxRatePercent = taxRatePercent ? String(taxRatePercent) : null;
-    const boolReverseCharge = Boolean(reverseCharge);
-
+    const strSourceCode = String(sourceCountryCode || 'XX');
+    
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
-
-    // Add a standard A4-like page (595 x 842 points)
     const page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
 
-    // Load fonts
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // ─── Color Palette ────────────────────────────────────────────────────────
-    const purple = rgb(0.424, 0.388, 1.0);    // #6C63FF
-    const mint = rgb(0.0, 0.851, 0.647);       // #00D9A5
-    const dark = rgb(0.1, 0.1, 0.15);
-    const gray = rgb(0.5, 0.5, 0.55);
-    const lightGray = rgb(0.95, 0.96, 0.99);
+    // Exact mockup colors
+    const blueBg = rgb(0.35, 0.33, 0.89); 
     const white = rgb(1, 1, 1);
+    const dark = rgb(0.1, 0.1, 0.1);
+    const gray = rgb(0.4, 0.4, 0.4);
+    const lightGray = rgb(0.96, 0.96, 0.97);
+    const green = rgb(0.0, 0.65, 0.4); 
 
-    // ─── Header Banner ────────────────────────────────────────────────────────
+    // Header Background
     page.drawRectangle({
       x: 0,
-      y: height - 100,
+      y: height - 160,
       width,
-      height: 100,
-      color: purple
+      height: 160,
+      color: blueBg
     });
 
-    page.drawText('Global Tax Engine', {
-      x: 40,
-      y: height - 45,
-      size: 22,
-      font: boldFont,
-      color: white
-    });
+    // Header Left
+    page.drawText('INVOICE', { x: 50, y: height - 60, size: 28, font: boldFont, color: white });
+    page.drawText('Global Tax Engine', { x: 50, y: height - 100, size: 12, font: regularFont, color: white });
 
-    page.drawText('TAX INVOICE', {
-      x: 40,
-      y: height - 70,
-      size: 12,
-      font: regularFont,
-      color: rgb(0.8, 0.8, 1.0)
-    });
-
-    const invoiceNum = `INV-${Date.now()}`;
+    // Header Right
+    const invoiceNum = `GTE-${Math.floor(Math.random() * 100000)}`;
     const today = new Date().toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      year: 'numeric', month: '2-digit', day: '2-digit'
     });
+    
+    page.drawText(`Date: ${today}`, { x: 420, y: height - 60, size: 10, font: regularFont, color: white });
+    page.drawText(`Invoice #: ${invoiceNum}`, { x: 420, y: height - 85, size: 10, font: regularFont, color: white });
 
-    page.drawText(`Invoice #${invoiceNum}`, {
-      x: width - 200,
-      y: height - 45,
-      size: 11,
-      font: regularFont,
-      color: rgb(0.8, 0.8, 1.0)
-    });
-
-    page.drawText(today, {
-      x: width - 200,
-      y: height - 65,
-      size: 10,
-      font: regularFont,
-      color: rgb(0.8, 0.8, 1.0)
-    });
-
-    // ─── Details Section ──────────────────────────────────────────────────────
-    let y = height - 140;
-
-    page.drawText('Sale Details', {
-      x: 40,
-      y,
-      size: 14,
-      font: boldFont,
-      color: dark
-    });
-
+    // Bill To
+    let y = height - 220;
+    page.drawText('Bill To:', { x: 50, y, size: 14, font: boldFont, color: dark });
     y -= 30;
-    const detailRows = [
-      ['Destination Country', `${strCountryName} (${strCountryCode})`],
-      ['Product Type', strProductType === 'digital' ? 'Digital Product' : 'Physical Product'],
-      ['Buyer Type', strBuyerType === 'B2B' ? 'Business (B2B)' : 'Consumer (B2C)'],
-      ['Tax Authority', strAuthority],
-      ['Tax Type', strTaxName]
-    ];
+    page.drawText(`${strCountryName} — ${strAuthority.split(' ')[0] || 'Tax Dept'}`, { x: 50, y, size: 11, font: regularFont, color: dark });
+    y -= 25;
+    page.drawText(`Buyer Type: ${strBuyerType}`, { x: 50, y, size: 11, font: regularFont, color: dark });
+    y -= 50;
 
-    detailRows.forEach(([label, value]) => {
-      page.drawText(label, {
-        x: 40,
-        y,
-        size: 11,
-        font: regularFont,
-        color: gray
-      });
-      page.drawText(String(value), {
-        x: 220,
-        y,
-        size: 11,
-        font: regularFont,
-        color: dark
-      });
-      y -= 22;
-    });
+    // Table Header
+    page.drawRectangle({ x: 35, y: y - 10, width: 525, height: 35, color: lightGray });
+    page.drawText('DESCRIPTION', { x: 50, y, size: 10, font: boldFont, color: gray });
+    page.drawText('RATE', { x: 280, y, size: 10, font: boldFont, color: gray });
+    page.drawText(`AMOUNT (${strCurrency})`, { x: 430, y, size: 10, font: boldFont, color: gray });
+    y -= 45;
 
-    // ─── Divider ──────────────────────────────────────────────────────────────
-    y -= 10;
-    page.drawRectangle({ x: 40, y, width: width - 80, height: 1, color: rgb(0.88, 0.89, 0.95) });
+    // Row 1
+    page.drawText(strProductType === 'digital' ? 'Digital Product/Service' : 'Physical Product', { x: 50, y, size: 11, font: regularFont, color: dark });
+    page.drawText('—', { x: 280, y, size: 11, font: regularFont, color: dark });
+    page.drawText(`${numOriginalAmount.toFixed(2)}`, { x: 430, y, size: 11, font: regularFont, color: dark }); 
+    y -= 45;
+
+    // Row 2
+    page.drawText(strTaxName || 'Sales Tax', { x: 50, y, size: 11, font: regularFont, color: dark });
+    page.drawText(taxRatePercent || `${(numTaxRate * 100).toFixed(2)}%`, { x: 280, y, size: 11, font: regularFont, color: dark });
+    page.drawText(`${numTaxAmount.toFixed(2)}`, { x: 430, y, size: 11, font: regularFont, color: dark });
     y -= 30;
 
-    // ─── Calculation Breakdown ────────────────────────────────────────────────
-    page.drawText('Tax Breakdown', {
-      x: 40,
-      y,
-      size: 14,
-      font: boldFont,
-      color: dark
-    });
-    y -= 20;
-
-    // Table header
-    page.drawRectangle({ x: 40, y: y - 8, width: width - 80, height: 26, color: lightGray });
-
-    page.drawText('Description', { x: 50, y: y, size: 11, font: boldFont, color: dark });
-    page.drawText('Rate', { x: 340, y: y, size: 11, font: boldFont, color: dark });
-    page.drawText(`Amount (${strCurrency})`, { x: 430, y: y, size: 11, font: boldFont, color: dark });
+    // Divider
+    page.drawRectangle({ x: 35, y, width: 525, height: 1, color: rgb(0.9, 0.9, 0.9) });
     y -= 30;
 
-    // Line: Base amount
-    page.drawText('Sale Amount (before tax)', { x: 50, y, size: 11, font: regularFont, color: dark });
-    page.drawText('—', { x: 340, y, size: 11, font: regularFont, color: dark });
-    page.drawText(numOriginalAmount.toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
+    // TOTAL row
+    page.drawText('TOTAL', { x: 50, y, size: 14, font: boldFont, color: dark });
+    page.drawText(`${numTotal.toFixed(2)}`, { x: 430, y, size: 14, font: boldFont, color: blueBg });
+    y -= 50;
+
+    // Breakdown right aligned text (roughly)
+    const breakdownX = 220;
+    const valueX = 430;
+    
+    page.drawText('Gross Revenue (from buyer)', { x: breakdownX, y, size: 11, font: regularFont, color: gray });
+    page.drawText(`${numGrossRev.toFixed(2)}`, { x: valueX, y, size: 11, font: regularFont, color: gray });
     y -= 25;
 
-    // Line: Tax
-    const taxLabel = boolReverseCharge ? `${strTaxName} (Reverse Charge)` : strTaxName;
-    page.drawText(taxLabel, { x: 50, y, size: 11, font: regularFont, color: dark });
-    page.drawText(strTaxRatePercent || `${(numTaxRate * 100).toFixed(1)}%`, { x: 340, y, size: 11, font: regularFont, color: dark });
-    page.drawText(numTaxAmount.toFixed(2), { x: 430, y, size: 11, font: regularFont, color: dark });
-    y -= 10;
+    page.drawText('Tax Remitted', { x: breakdownX, y, size: 11, font: regularFont, color: gray });
+    page.drawText(`-${numTaxAmount.toFixed(2)}`, { x: valueX, y, size: 11, font: regularFont, color: gray });
+    y -= 25;
 
-    // Total row
-    page.drawRectangle({ x: 40, y: y - 8, width: width - 80, height: 30, color: purple });
-    page.drawText('TOTAL', { x: 50, y: y + 3, size: 12, font: boldFont, color: white });
-    page.drawText(`${strCurrency} ${numTotal.toFixed(2)}`, { x: 390, y: y + 3, size: 13, font: boldFont, color: white });
+    page.drawText(`Corporate Tax (${corporateTaxRatePercent} ${strSourceCode})`, { x: breakdownX, y, size: 11, font: regularFont, color: gray });
+    page.drawText(`-${numCorpTax.toFixed(2)}`, { x: valueX, y, size: 11, font: regularFont, color: gray });
     y -= 40;
 
-    // ─── Reverse Charge Notice ────────────────────────────────────────────────
-    if (boolReverseCharge) {
-      y -= 10;
-      page.drawRectangle({ x: 40, y: y - 10, width: width - 80, height: 40, color: rgb(0.9, 1.0, 0.96) });
-      page.drawText(
-        '⚡ Reverse Charge applies: The buyer is responsible for accounting for the VAT.',
-        { x: 50, y: y + 5, size: 10, font: regularFont, color: rgb(0, 0.5, 0.35) }
-      );
-      y -= 30;
-    }
+    page.drawText('NET PROFIT', { x: breakdownX, y, size: 12, font: boldFont, color: dark });
+    page.drawText(`${numNetProfit.toFixed(2)}`, { x: valueX, y, size: 12, font: boldFont, color: green });
+    y -= 40;
 
-    // ─── Footer ───────────────────────────────────────────────────────────────
-    page.drawText('Generated by Global Tax Engine  •  globaltaxengine.app', {
-      x: 40,
-      y: 30,
-      size: 9,
-      font: regularFont,
-      color: gray
-    });
+    // Footer
+    page.drawText(`Tax Authority: ${strAuthority}`, { x: 50, y, size: 9, font: regularFont, color: gray });
+    y -= 30;
 
-    page.drawText('This invoice is for informational purposes only. Consult a tax professional for compliance.', {
-      x: 40,
-      y: 18,
-      size: 8,
-      font: regularFont,
-      color: rgb(0.7, 0.7, 0.75)
-    });
+    page.drawText('This invoice was generated by Global Tax Engine for informational purposes only.', { x: 50, y, size: 9, font: regularFont, color: gray });
+    y -= 20;
+    page.drawText('Consult a qualified tax professional before filing. globaltaxengine.io', { x: 50, y, size: 9, font: regularFont, color: gray });
 
-    // Mint accent bar at bottom
-    page.drawRectangle({ x: 0, y: 0, width, height: 6, color: mint });
-
-    // ─── Serialize PDF ────────────────────────────────────────────────────────
+    // Output Base PDF
     const pdfBytes = await pdfDoc.save();
 
     res.setHeader('Content-Type', 'application/pdf');
