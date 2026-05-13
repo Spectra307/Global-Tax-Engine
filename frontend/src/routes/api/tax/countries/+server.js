@@ -2,8 +2,9 @@ import { json } from '@sveltejs/kit';
 import { getAllRules } from '$lib/server/datasetLoader.js';
 
 /** @type {import('./$types').RequestHandler} */
-export function GET() {
-  const countries = getAllRules().map((rule) => ({
+export async function GET() {
+  const rules = await getAllRules();
+  const countries = rules.map((rule) => ({
     code: rule.country,
     name: rule.name,
     flag: rule.flag,

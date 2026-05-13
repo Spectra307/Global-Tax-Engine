@@ -1,18 +1,17 @@
 <!--
   HistoryTable.svelte - Calculation History Table
 
-  What this component does:
-    Fetches and displays all previous tax calculations from the backend.
-    Shows a table with Date, Country, Amount, Tax, and Total columns.
-
-  How it interacts with the system:
-    - Uses api.js fetchHistory() to GET /api/history
-    - Used on the History page (/history/+page.svelte)
+  Fetches and displays past tax calculations from /api/history.
+  Accepts optional filter props (country, dateFrom, dateTo).
+  Includes Date, Country, Type, Amount, Tax, Total, Net Profit, Rate columns.
 -->
 <script>
   import { onMount } from 'svelte';
   import { History, RefreshCw, Loader2 } from 'lucide-svelte';
   import { fetchHistory } from '$lib/api.js';
+
+  // Filter props passed from parent (history page)
+  export let filters = {};
 
   let records = [];
   let loading = true;
@@ -22,7 +21,17 @@
     loading = true;
     error = '';
     try {
-      records = await fetchHistory();
+      // Build query params from filters
+      const params = new URLSearchParams();
+      if (filters?.country) params.set('country', filters.country);
+      if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
+      if (filters?.dateTo) params.set('dateTo', filters.dateTo);
+
+      const qs = params.toString();
+      const res = await fetch(`/api/history${qs ? '?' + qs : ''}`);
+      if (!res.ok) throw new Error('Failed to load history');
+      const data = await res.json();
+      records = data.history || [];
     } catch (e) {
       error = e.message;
     } finally {
@@ -32,6 +41,9 @@
 
   onMount(loadHistory);
 
+  // Re-load when filters change
+  $: filters, loadHistory();
+
   function formatDate(iso) {
     return new Date(iso).toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
@@ -39,8 +51,8 @@
     });
   }
 
-  function formatMoney(n, currency = '') {
-    return `${currency} ${parseFloat(n).toFixed(2)}`.trim();
+  function formatMoney(n) {
+    return `$${parseFloat(n || 0).toFixed(2)}`;
   }
 </script>
 
@@ -94,6 +106,7 @@
             <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
             <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tax</th>
             <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net Profit</th>
             <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rate</th>
           </tr>
         </thead>
@@ -117,6 +130,9 @@
               </td>
               <td class="px-4 py-3.5 text-right">
                 <span class="font-bold gradient-text">{formatMoney(row.total)}</span>
+              </td>
+              <td class="px-4 py-3.5 text-right">
+                <span class="font-semibold" style="color:#00D9A5">{formatMoney(row.net_profit)}</span>
               </td>
               <td class="px-4 py-3.5 text-center">
                 <span class="font-semibold" style="color: #6C63FF">

@@ -10,7 +10,7 @@ export async function POST({ request }) {
       throw error(400, 'Missing required fields: amount, productType, buyerType');
     }
 
-    const results = calculateWhatIf(parseFloat(amount), productType, buyerType);
+    const results = await calculateWhatIf(parseFloat(amount), productType, buyerType);
     return json({ results });
   } catch (err) {
     throw error(400, err.message);

@@ -1,22 +1,18 @@
 <!--
   dashboard/+page.svelte - Tax Calculator Dashboard Page
 
-  What this file does:
-    The main working page of the app.
-    Shows TaxForm on the left and ResultCard on the right.
-    Saves each successful calculation to history automatically.
-
-  How it interacts with the system:
-    - TaxForm emits a "result" event with tax data
-    - ResultCard receives and displays the result
-    - saveHistory() is called automatically after each calculation
+  The main working page of the app.
+  Shows TaxForm on the left and ResultCard on the right.
+  Saves each successful calculation to history automatically.
+  Includes CheckoutSimulator panel below.
 -->
 <script>
   import TaxForm from '$lib/components/TaxForm.svelte';
   import ResultCard from '$lib/components/ResultCard.svelte';
   import WhatIfScenario from '$lib/components/WhatIfScenario.svelte';
+  import CheckoutSimulator from '$lib/components/CheckoutSimulator.svelte';
   import { saveHistory, getWhatIfScenario } from '$lib/api.js';
-  import { BarChart3 } from 'lucide-svelte';
+  import { BarChart3, ShoppingCart, TrendingUp } from 'lucide-svelte';
 
   let result = null;
   let whatIfData = [];
@@ -45,13 +41,24 @@
 <!-- Page header -->
 <div style="background: linear-gradient(135deg, #6C63FF, #00D9A5)" class="py-10 px-6">
   <div class="max-w-6xl mx-auto">
-    <div class="flex items-center gap-3 mb-2">
-      <BarChart3 size={28} color="white" />
-      <h1 class="text-3xl font-bold text-white">Tax Calculator</h1>
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <BarChart3 size={28} color="white" />
+          <h1 class="text-3xl font-bold text-white">Tax Calculator</h1>
+        </div>
+        <p class="text-white/80 text-base ml-11">
+          Enter your sale details to instantly calculate international tax obligations.
+        </p>
+      </div>
+      <a
+        href="/dashboard/analytics"
+        class="hidden md:flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border border-white/20"
+      >
+        <TrendingUp size={15} />
+        Analytics
+      </a>
     </div>
-    <p class="text-white/80 text-base ml-11">
-      Enter your sale details to instantly calculate international tax obligations.
-    </p>
   </div>
 </div>
 
@@ -101,4 +108,21 @@
       <p class="text-gray-600">Generate a professional branded invoice PDF after any calculation.</p>
     </div>
   </div>
+
+  <!-- Checkout Tax Simulator Section -->
+  <div class="mt-12">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #6C63FF, #00D9A5)">
+        <ShoppingCart size={18} color="white" />
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Checkout Tax Simulator</h2>
+        <p class="text-sm text-gray-500">Preview how tax appears in a customer-facing checkout flow</p>
+      </div>
+    </div>
+    <div class="max-w-lg">
+      <CheckoutSimulator />
+    </div>
+  </div>
+
 </div>

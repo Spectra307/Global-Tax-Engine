@@ -2,12 +2,12 @@
  * api.js - Frontend API Helper
  *
  * What this file does:
- *   Provides clean functions to call the backend Express API.
+ *   Provides clean functions to call the SvelteKit API routes.
  *   Centralizes the API base URL so it's easy to change.
  *
  * How it interacts with the system:
- *   - Used by TaxForm.svelte, InvoiceButton.svelte, and HistoryTable.svelte
- *   - Calls backend running at http://localhost:3001
+ *   - Used by TaxForm.svelte, InvoiceButton.svelte, HistoryTable.svelte, and CheckoutSimulator.svelte
+ *   - Calls SvelteKit routes at /api/*
  */
 
 // Change this to your deployed backend URL in production
@@ -42,6 +42,7 @@ export async function calculateTax({ amount, destCountry, sourceCountry, product
 
 /**
  * Saves a calculation to history.
+ * Maps the full tax result object to the POST /api/history schema.
  * @param {object} record - The tax result object from calculateTax()
  */
 export async function saveHistory(record) {
@@ -49,7 +50,23 @@ export async function saveHistory(record) {
     await fetch(`${API_BASE}/history`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(record)
+      body: JSON.stringify({
+        amount: record.originalAmountUSD || record.amount,
+        countryCode: record.countryCode,
+        country: record.countryCode,       // legacy compat
+        countryName: record.countryName,
+        taxRate: record.taxRate,
+        taxAmount: record.taxAmount,
+        total: record.total,
+        netProfit: record.netProfit,
+        taxName: record.taxName,
+        buyerType: record.buyerType,
+        productType: record.productType,
+        authority: record.authority,
+        reverseCharge: record.reverseCharge,
+        destState: record.destState || null,
+        sourceCountry: record.sourceCountryCode || null
+      })
     });
   } catch (e) {
     // Non-critical — don't block the UI if history saving fails
@@ -59,10 +76,16 @@ export async function saveHistory(record) {
 
 /**
  * Fetches all calculation history records.
+ * @param {object} [filters] - Optional { country, dateFrom, dateTo }
  * @returns {Array} Array of history records
  */
-export async function fetchHistory() {
-  const res = await fetch(`${API_BASE}/history`);
+export async function fetchHistory(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.country) params.set('country', filters.country);
+  if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.set('dateTo', filters.dateTo);
+  const qs = params.toString();
+  const res = await fetch(`${API_BASE}/history${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error('Failed to load history');
   const data = await res.json();
   return data.history;
@@ -109,3 +132,12 @@ export async function getWhatIfScenario({ amount, productType, buyerType }) {
   return data.results;
 }
 
+/**
+ * Fetches aggregated analytics from the analytics API.
+ * @returns {object} Analytics metrics
+ */
+export async function fetchAnalytics() {
+  const res = await fetch(`${API_BASE}/analytics`);
+  if (!res.ok) throw new Error('Failed to load analytics');
+  return res.json();
+}

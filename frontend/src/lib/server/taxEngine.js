@@ -1,12 +1,28 @@
 /**
  * taxEngine.js - Core Tax Calculation Service (SvelteKit ESM Version)
+ *
+ * All tax calculations happen server-side only.
+ * Supports both object-params style and positional-args style for backwards compat.
  */
 import { getRuleByCountry, getAllRules } from './datasetLoader.js';
 
 /**
  * Calculates tax for a cross-border sale.
+ *
+ * Accepts either:
+ *   calculateTax({ amount, destCountry, sourceCountry, productType, buyerType, destState })
+ * or (legacy positional):
+ *   calculateTax(amount, destCountry, sourceCountry, productType, buyerType, destState)
  */
-export function calculateTax(amount, destCountry, sourceCountry, productType, buyerType, destState = null) {
+export async function calculateTax(amountOrParams, destCountry, sourceCountry, productType, buyerType, destState = null) {
+  // Support both calling conventions
+  let amount;
+  if (amountOrParams !== null && typeof amountOrParams === 'object') {
+    ({ amount, destCountry, sourceCountry, productType, buyerType, destState = null } = amountOrParams);
+  } else {
+    amount = amountOrParams;
+  }
+
   // --- Input Validation ---
   if (!amount || isNaN(amount) || amount <= 0) {
     throw new Error('Amount must be a positive number.');
@@ -25,12 +41,12 @@ export function calculateTax(amount, destCountry, sourceCountry, productType, bu
   }
 
   // --- Find Country Rules ---
-  const destRule = getRuleByCountry(destCountry);
+  const destRule = await getRuleByCountry(destCountry);
   if (!destRule) {
     throw new Error(`Destination country "${destCountry}" is not supported.`);
   }
 
-  const sourceRule = getRuleByCountry(sourceCountry);
+  const sourceRule = await getRuleByCountry(sourceCountry);
   if (!sourceRule) {
     throw new Error(`Source country "${sourceCountry}" is not supported.`);
   }
@@ -89,15 +105,17 @@ export function calculateTax(amount, destCountry, sourceCountry, productType, bu
     reverseCharge,
     originalAmount: convertedAmount,
     originalAmountUSD: parsedAmountUSD,
-    exchangeRate: 1.0
+    exchangeRate: 1.0,
+    // Tax Rule Explanation Engine (Task 6)
+    explanation: destRule.rule_explanation || null
   };
 }
 
 /**
  * Iterates through all countries and returns an array of what taxes WOULD be
  */
-export function calculateWhatIf(amount, productType, buyerType) {
-  const allRules = getAllRules();
+export async function calculateWhatIf(amount, productType, buyerType) {
+  const allRules = await getAllRules();
   
   const results = allRules.map(rule => {
     let taxRate = productType === 'digital' ? rule.digital_tax_rate : rule.physical_tax_rate;

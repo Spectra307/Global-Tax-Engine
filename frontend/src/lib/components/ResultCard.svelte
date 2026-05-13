@@ -79,6 +79,17 @@
       </p>
     </div>
 
+    <!-- Tax Rule Explanation Engine (Task 6) -->
+    {#if result.explanation}
+    <div class="mt-4 bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
+      <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Why this tax applies
+      </p>
+      <p class="text-sm text-emerald-900 leading-relaxed">{result.explanation}</p>
+    </div>
+    {/if}
+
   </div>
 
   <div class="flex items-center gap-2 mb-2">

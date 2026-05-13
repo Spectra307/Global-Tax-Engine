@@ -45,6 +45,11 @@
                 {currentPath === '/history' ? 'text-primary bg-primary/8' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}">
         History
       </a>
+      <a href="/dashboard/analytics"
+         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150
+                {currentPath.startsWith('/dashboard/analytics') ? 'text-primary bg-primary/8' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}">
+        Analytics
+      </a>
     </div>
 
     <!-- CTA Button -->
