@@ -1,193 +1,122 @@
-# Global Tax Engine 🌍
+# Global Tax Engine 🌍 📊
 
-A hackathon MVP web application for calculating cross-border tax for SMB sellers across 20 countries.
+A professional-grade, high-performance web application designed to simplify cross-border tax compliance for SMBs selling digital and physical products globally.
 
-## Key Features
-- **USD Standardization**: All calculations are natively processed and displayed in USD ($) for global consistency.
-- **US State Tax Support**: Accurate state-level sales tax calculation for the United States (CA, NY, TX, FL, WA).
-- **Professional Result Summary**: Visual cards for Tax Rate, Tax Amount, and Total Price above every invoice preview.
-- **Project Tracking**: Integrated history and exportable PDF invoices.
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | SvelteKit + TailwindCSS + Lucide Icons |
-| Backend | Node.js + Express.js |
-| Database | Supabase (free tier) |
-| PDF | pdf-lib |
-| Data | Local JSON (20 countries) |
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-4-ff3e00?logo=svelte)](https://kit.svelte.dev/)
+[![Supabase](https://img.shields.io/badge/Database-Supabase-3ecf8e?logo=supabase)](https://supabase.com/)
+[![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## Quick Start
+## 🚀 Key Features
 
-### 1. Clone and Install
+### 1. Intelligent Tax Engine
+- **Dynamic Rules**: Supports **20+ major economic hubs** with logic for VAT, GST, and Sales Tax.
+- **US State Granularity**: Automatic detection of state-level taxes for CA, NY, TX, FL, and WA.
+- **B2B Reverse Charge**: Built-in intelligence for EU VAT directives and global B2B tax shifting.
+- **Net Profit Tracking**: Calculates corporate tax liabilities to provide true business profitability metrics.
+- **Rule Explainer**: Human-readable explanations for every calculation citing specific tax authorities.
 
+### 2. Business Intelligence & Analytics
+- **Visual Dashboard**: Real-time charts for revenue trends and tax liabilities (powered by Chart.js).
+- **Market Insights**: Doughnut charts showing transaction volume and market share by country.
+- **KPI Metrics**: Instant visibility into Total Revenue, Tax Collected, and Net Profit.
+
+### 3. Professional Tools
+- **Checkout Simulator**: A high-fidelity "Stripe-style" preview of the customer's payment experience.
+- **What-If Simulations**: Instantly compare tax rates across all supported countries for any sale amount.
+- **PDF Invoice Generator**: Professional, audit-ready PDF invoices generated dynamically using `pdf-lib`.
+- **Smart History**: Searchable, filtered history logs stored securely in Supabase.
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | SvelteKit (Svelte 4) + Vite |
+| **Backend API** | SvelteKit Serverless Functions (Node.js) |
+| **Database** | Supabase (PostgreSQL) |
+| **Styling** | Vanilla CSS + TailwindCSS |
+| **Charts** | Chart.js |
+| **PDF Engine** | pdf-lib |
+
+---
+
+## 📦 Project Structure
+
+```text
+Global-Tax-Engine/
+├── frontend/                  # Main Application (SvelteKit)
+│   ├── src/
+│   │   ├── lib/
+│   │   │   ├── components/    # Reusable UI (TaxForm, ResultCard, Analytics)
+│   │   │   └── server/        # Core Logic (taxEngine.js, datasetLoader.js)
+│   │   └── routes/            # Pages & API Endpoints
+│   └── package.json
+├── backend/                   # Legacy/Standalone Express API
+└── supabase_schema.sql        # Database initialization script
+```
+
+---
+
+## 🚦 Quick Start
+
+### 1. Clone & Install
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend (new terminal)
+# Install dependencies
 cd frontend
 npm install
 ```
 
 ### 2. Configure Environment
-
-```bash
-# Copy the example env file
-cp backend/.env.example backend/.env
-```
-
-Then edit `backend/.env` with your Supabase credentials:
-```
+Create a `.env` file in the `frontend` folder:
+```env
 SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-> **Note:** The app works without Supabase — history will be stored in-memory during the session.
+### 3. Database Setup
+Run the contents of [supabase_schema.sql](./supabase_schema.sql) in your **Supabase SQL Editor**. This will:
+1. Create the `tax_rules` table and seed it with 20 countries.
+2. Create `tax_calculations` and `invoices` tables.
+3. Enable Row Level Security (RLS).
 
-### 3. Set Up Supabase (optional, for persistent history)
-
-Run this SQL in your Supabase SQL editor:
-
-```sql
-create table tax_history (
-  id bigint primary key generated always as identity,
-  amount numeric not null,
-  country text not null,
-  country_name text,
-  tax_rate numeric,
-  tax_amount numeric,
-  total numeric,
-  tax_name text,
-  buyer_type text,
-  product_type text,
-  authority text,
-  created_at timestamptz default now()
-);
-```
-
-### 4. Run the Application
-
-**Terminal 1 – Backend:**
+### 4. Run Development Server
 ```bash
-cd backend
 npm run dev
-# Runs on http://localhost:3001
-```
-
-**Terminal 2 – Frontend:**
-```bash
-cd frontend
-npm run dev
-# Runs on http://localhost:5173
-```
-
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
----
-
-## Project Structure
-
-```
-Global-Tax-Engine/
-├── backend/
-│   ├── src/
-│   │   ├── server.js              # Express entry point
-│   │   ├── data/
-│   │   │   └── tax_rules.json     # 20-country tax dataset
-│   │   ├── services/
-│   │   │   ├── taxEngine.js       # Core tax calculation logic
-│   │   │   └── datasetLoader.js   # JSON dataset loader
-│   │   └── routes/
-│   │       ├── tax.js             # POST /api/tax
-│   │       ├── invoice.js         # POST /api/invoice
-│   │       └── history.js         # GET/POST /api/history
-│   ├── .env.example
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── app.html               # Root HTML
-    │   ├── app.css                # Global styles + Tailwind
-    │   ├── lib/
-    │   │   ├── api.js             # API helper functions
-    │   │   └── components/
-    │   │       ├── Navbar.svelte
-    │   │       ├── TaxForm.svelte
-    │   │       ├── ResultCard.svelte
-    │   │       ├── InvoiceButton.svelte
-    │   │       └── HistoryTable.svelte
-    │   └── routes/
-    │       ├── +layout.svelte     # Root layout
-    │       ├── +page.svelte       # Landing page (with Coming Soon)
-    │       ├── dashboard/
-    │       │   └── +page.svelte   # Calculator
-    │       └── history/
-    │           └── +page.svelte   # History
-    └── package.json
 ```
 
 ---
 
-## API Reference
+## 📡 API Reference
 
-### `POST /api/tax`
-Calculate tax for a sale.
-
-**Request:**
-```json
-{ 
-  "amount": 1000, 
-  "country": "US", 
-  "destState": "CA", 
-  "productType": "digital", 
-  "buyerType": "B2C" 
-}
-```
-*Note: `destState` is required when country is "US".*
-
-**Response:**
-```json
-{
-  "taxRate": 0.0725,
-  "taxRatePercent": "7.25%",
-  "taxAmount": 72.50,
-  "total": 1072.50,
-  "authority": "California Department of Tax and Fee Administration",
-  "taxName": "Sales Tax",
-  "countryName": "United States",
-  "currency": "USD",
-  "reverseCharge": false
-}
-```
-
-### `POST /api/invoice`
-Generate a PDF invoice. Returns a downloadable PDF file.
-
-### `GET /api/history`
-Returns all past calculation records (standardized in USD).
-
-### `POST /api/history`
-Saves a new calculation record.
-
-### `GET /api/tax/countries`
-Returns all 20 supported countries for the dropdown.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/tax` | `POST` | Execute a tax calculation |
+| `/api/tax/countries` | `GET` | Get list of supported jurisdictions |
+| `/api/tax/whatif` | `POST` | Compare rates across all countries |
+| `/api/analytics` | `GET` | Fetch aggregated business metrics |
+| `/api/history` | `GET` | Retrieve searchable calculation logs |
+| `/api/invoice` | `POST` | Generate and download a PDF invoice |
 
 ---
 
-## Coming Soon 🚀
-- **Stripe Tax Integration**: Seamlessly sync calculations with your Stripe checkout.
-- **100+ Country Support**: Expanding dataset to cover global jurisdictions.
-- **AI Tax Assistant**: Instant answers to complex tax compliance questions.
+## 🌍 Supported Countries
+
+🇺🇸 United States · 🇬🇧 United Kingdom · 🇩🇪 Germany · 🇫🇷 France · 🇮🇹 Italy · 🇪🇸 Spain · 🇨🇦 Canada · 🇦🇺 Australia · 🇯🇵 Japan · 🇮🇳 India · 🇧🇷 Brazil · 🇸🇬 Singapore · 🇳🇱 Netherlands · 🇸🇪 Sweden · 🇳🇴 Norway · 🇩🇰 Denmark · 🇨🇭 Switzerland · 🇳🇿 New Zealand · 🇿🇦 South Africa · 🇦🇪 UAE
 
 ---
 
-## Supported Countries
+## 🗺 Roadmap
+- [x] **Database Rule Migration**: Completed transition from static JSON to Supabase.
+- [ ] **Stripe Tax Sync**: Direct integration with Stripe Checkout.
+- [ ] **100+ Jurisdictions**: Expanding coverage to include emerging markets.
+- [ ] **AI Compliance Assistant**: LLM-powered tax advisor.
+- [ ] **Multi-User RBAC**: Team management for enterprise accounts.
 
-🇺🇸 US · 🇬🇧 GB · 🇩🇪 DE · 🇫🇷 FR · 🇮🇹 IT · 🇪🇸 ES · 🇨🇦 CA · 🇦🇺 AU  
-🇯🇵 JP · 🇮🇳 IN · 🇧🇷 BR · 🇸🇬 SG · 🇳🇱 NL · 🇸🇪 SE · 🇳🇴 NO · 🇩🇰 DK  
-🇨🇭 CH · 🇳🇿 NZ · 🇿🇦 ZA · 🇦🇪 AE
+---
+
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.
